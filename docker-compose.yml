@@ -1,0 +1,61 @@
+services:
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: image-storage-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - images-data:/images
+      - logs-data:/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - image-storage-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import http.client; conn = http.client.HTTPConnection('localhost:8000'); conn.request('GET', '/health'); resp = conn.getresponse(); exit(0 if resp.status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Nginx service for serving static images
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: image-storage-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - images-data:/images:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - image-storage-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+# Named volumes for persistent storage
+volumes:
+  images-data:
+    driver: local
+    name: image-storage-images
+  logs-data:
+    driver: local
+    name: image-storage-logs
+
+# Network for service communication
+networks:
+  image-storage-network:
+    driver: bridge
+    name: image-storage-network
