@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  base: '/LUMITY/',
   plugins: [
     react(),
     tailwindcss(),
@@ -16,11 +17,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/upload': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/health': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/images': {

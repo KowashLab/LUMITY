@@ -102,7 +102,11 @@ export function UploadBanner() {
         });
       }, 150);
 
-      const response = await fetch('/upload', {
+      // Use environment variable or relative URL
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const uploadEndpoint = `${apiUrl}/upload`;
+
+      const response = await fetch(uploadEndpoint, {
         method: 'POST',
         body: formData,
       });
@@ -188,9 +192,18 @@ export function UploadBanner() {
                 Store them here.
               </span>
             </h2>
-            <p className="text-xl font-medium" style={{ color: "#C5C5C5" }}>
+            <p className="text-xl font-medium mb-4" style={{ color: "#C5C5C5" }}>
               Drag, drop, and watch your images upload instantly.
             </p>
+            {!import.meta.env.VITE_API_URL && (
+              <p className="text-sm font-medium px-4 py-2 rounded-lg inline-block" style={{ 
+                color: "#FF4B2B",
+                background: "rgba(255, 75, 43, 0.1)",
+                border: "1px solid rgba(255, 75, 43, 0.3)"
+              }}>
+                ⚠️ Demo mode: Run locally with Docker to test upload
+              </p>
+            )}
           </motion.div>
 
           {/* Right Side - Upload Zone */}
