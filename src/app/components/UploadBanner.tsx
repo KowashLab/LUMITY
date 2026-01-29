@@ -87,15 +87,16 @@ export function UploadBanner() {
       return;
     }
 
+    let progressInterval: NodeJS.Timeout | undefined;
+
     try {
       const formData = new FormData();
       formData.append('file', file);
 
       // Simulate progress
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 90) {
-            clearInterval(progressInterval);
             return 90;
           }
           return prev + 10;
@@ -111,7 +112,7 @@ export function UploadBanner() {
         body: formData,
       });
 
-      clearInterval(progressInterval);
+      if (progressInterval) clearInterval(progressInterval);
       setUploadProgress(100);
 
       const data: UploadResponse = await response.json();
@@ -133,7 +134,7 @@ export function UploadBanner() {
       }, 10000);
 
     } catch (err) {
-      clearInterval(progressInterval);
+      if (progressInterval) clearInterval(progressInterval);
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
       setIsUploading(false);
       setUploadProgress(0);
